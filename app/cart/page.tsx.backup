@@ -1,0 +1,19 @@
+'use client';
+
+import { CartAdminItem } from "@/types";
+import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation';
+import { Eye, ArrowUpDown } from 'lucide-react';
+
+  const [items, setItems] = useState<CartAdminItem[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [query, setQuery] = useState('');
+  const [minTotal, setMinTotal] = useState('');
+  const [maxTotal, setMaxTotal] = useState('');
+  const [sortBy, setSortBy] = useState<'id' | 'user_name' | 'user_email' | 'total_items' | 'grand_total' | 'created_at'>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
