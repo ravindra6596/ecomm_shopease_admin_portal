@@ -268,7 +268,7 @@ export default function OrdersPage() {
                         <td className="px-5 py-4 text-slate-300">{(page - 1) * 10 + index + 1}</td>
                         <td className="px-5 py-4 text-slate-300">{order.id}</td>
                         <td className="px-5 py-4 font-medium text-white">{order.user_name}</td>
-                        <td className="px-5 py-4 text-slate-200">{formatCurrency(order.total_amount)}</td>
+                        <td className="px-5 py-4 text-slate-200">{formatCurrency(order.total_discount_price+order.shipping)}</td>
                         <td className="px-5 py-4"><Badge variant={paymentBadge[order.payment_status]}>{order.payment_status}</Badge></td>
                         <td className="px-5 py-4"><Badge variant={orderBadge[order.status] ?? 'muted'}>{order.status}</Badge></td>
                         <td className="px-5 py-4">{order.payment_method.toLocaleUpperCase()}</td>

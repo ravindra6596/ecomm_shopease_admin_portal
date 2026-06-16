@@ -1,4 +1,4 @@
-export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://identical-flattered-civil.ngrok-free.dev';
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://joins-accessories-techno-julia.trycloudflare.com';
 export const AUTH_TOKEN_KEY = 'ecomm_admin_token';
 export const AUTH_USER_KEY = 'ecomm_admin_user';
 export const ROUTES = {

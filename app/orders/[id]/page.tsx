@@ -38,65 +38,65 @@ export default function OrderDetails({ params }: any) {
   const [updatingPaymentStatus, setUpdatingPaymentStatus] = useState(false);
 
   useEffect(() => {
-     const loadOrder = async () => {
-       try {
-         setLoading(true);
-         const orderData = await getOrderById(Number(id));
-         setOrder(orderData);
-         setOrderStatus(orderData.status);
-         setPaymentStatus(orderData.payment_status);
-       } catch (error) {
-         console.error('Failed to load order:', error);
-         toast.error(error instanceof Error ? error.message : 'Failed to load order');
-       } finally {
-         setLoading(false);
-       }
-     };
+    const loadOrder = async () => {
+      try {
+        setLoading(true);
+        const orderData = await getOrderById(Number(id));
+        setOrder(orderData);
+        setOrderStatus(orderData.status);
+        setPaymentStatus(orderData.payment_status);
+      } catch (error) {
+        console.error('Failed to load order:', error);
+        toast.error(error instanceof Error ? error.message : 'Failed to load order');
+      } finally {
+        setLoading(false);
+      }
+    };
 
     if (id) {
       loadOrder();
     }
   }, [id]);
 
-   const handleUpdateStatus = async () => {
-     if (!order) return;
-     if (order.status === orderStatus) {
-       toast.error('Please select a different status before updating.');
-       return;
-     }
+  const handleUpdateStatus = async () => {
+    if (!order) return;
+    if (order.status === orderStatus) {
+      toast.error('Please select a different status before updating.');
+      return;
+    }
 
-     try {
-       setUpdatingStatus(true);
-       const updatedOrder = await updateOrderStatus(Number(id), orderStatus);
-       setOrder(updatedOrder);
-       toast.success('Order status updated successfully.');
-     } catch (error) {
-       console.error('Failed to update status:', error);
-       toast.error(error instanceof Error ? error.message : 'Failed to update order status');
-     } finally {
-       setUpdatingStatus(false);
-     }
-   };
+    try {
+      setUpdatingStatus(true);
+      const updatedOrder = await updateOrderStatus(Number(id), orderStatus);
+      setOrder(updatedOrder);
+      toast.success('Order status updated successfully.');
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to update order status');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
-   const handleUpdatePaymentStatus = async () => {
-     if (!order) return;
-     if (order.payment_status === paymentStatus) {
-       toast.error('Please select a different payment status before updating.');
-       return;
-     }
+  const handleUpdatePaymentStatus = async () => {
+    if (!order) return;
+    if (order.payment_status === paymentStatus) {
+      toast.error('Please select a different payment status before updating.');
+      return;
+    }
 
-     try {
-       setUpdatingPaymentStatus(true);
-       const updatedOrder = await updateOrderPaymentStatus(Number(id), paymentStatus);
-       setOrder(updatedOrder);
-       toast.success('Payment status updated successfully.');
-     } catch (error) {
-       console.error('Failed to update payment status:', error);
-       toast.error(error instanceof Error ? error.message : 'Failed to update payment status');
-     } finally {
-       setUpdatingPaymentStatus(false);
-     }
-   };
+    try {
+      setUpdatingPaymentStatus(true);
+      const updatedOrder = await updateOrderPaymentStatus(Number(id), paymentStatus);
+      setOrder(updatedOrder);
+      toast.success('Payment status updated successfully.');
+    } catch (error) {
+      console.error('Failed to update payment status:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to update payment status');
+    } finally {
+      setUpdatingPaymentStatus(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -151,22 +151,54 @@ export default function OrderDetails({ params }: any) {
               </div>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-               <div className="rounded-3xl bg-slate-900/80 p-5">
-                 <p className="text-sm text-slate-400">Payment status</p>
-                 <div className="mt-2 flex items-center gap-2 text-white">
-                   <CreditCard className="h-4 w-4 text-sky-300" />
-                   <Badge variant={paymentBadge[order.payment_status]}>{order.payment_status}</Badge>
-                 </div>
-               </div>
+                <div className="rounded-3xl bg-slate-900/80 p-5">
+                  <p className="text-sm text-slate-400">Payment status</p>
+                  <div className="mt-2 flex items-center gap-2 text-white">
+                    <CreditCard className="h-4 w-4 text-sky-300" />
+                    <Badge variant={paymentBadge[order.payment_status]}>{order.payment_status}</Badge>
+                  </div>
+                </div>
                 <div className="rounded-3xl bg-slate-900/80 p-5">
                   <p className="text-sm text-slate-400">Total amount</p>
                   <div className="mt-2 flex items-center gap-2 text-white">
                     <Package className="h-4 w-4 text-emerald-300" />
-                    <span>{formatCurrency(order.total_amount)}</span>
+                    <span>{formatCurrency(order.total_discount_price + order.shipping)}</span>
                   </div>
                 </div>
               </div>
+              {/* Order Details */}
+              <div className="mt-6 space-y-4 rounded-[2rem] border border-white/10 bg-slate-900/80 p-6">
+                <p className="text-sm text-slate-400">Order Details</p>
 
+                
+               <div className="flex justify-between text-sm text-slate-300">
+                  <span>Total Amount</span>
+                  <span>{formatCurrency(order.total_amount)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-slate-300">
+                  <span>Discount Price</span>
+                  <span>{formatCurrency(order.total_discount_price)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-slate-300">
+                  <span>Total Saved</span>
+                  <span>{formatCurrency(order.total_amount - order.total_discount_price)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-slate-300">
+                  <span>Shipping</span>
+                  <span>{formatCurrency(order.shipping)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-slate-300">
+                  <span>Order Saved</span>
+                  <span>{formatCurrency(order.total_amount - order.total_discount_price - order.shipping)}</span>
+                </div>
+                
+                  <div className="border-t border-white/10 my-2" />
+                <div className="flex justify-between text-white font-medium">
+                  <span>Total Paid Amount</span>
+                  <span>{formatCurrency(order.total_discount_price + order.shipping)}</span>
+                </div>
+                
+              </div>
               {/* Address */}
               <div className="mt-6 space-y-4 rounded-[2rem] border border-white/10 bg-slate-900/80 p-6">
                 <p className="text-sm text-slate-400">Shipping Address</p>
@@ -202,7 +234,7 @@ export default function OrderDetails({ params }: any) {
               <div className="mt-6 rounded-[2rem] bg-slate-950/90 p-6">
                 <div className="flex items-center justify-between text-lg font-semibold text-white">
                   <span>Total</span>
-                  <span>{formatCurrency(order.total_amount)}</span>
+                  <span>{formatCurrency(order.total_discount_price + order.shipping)}</span>
                 </div>
               </div>
             </Card>
@@ -228,13 +260,12 @@ export default function OrderDetails({ params }: any) {
                   { status: 'delivered', label: 'Delivered', completed: order.status === 'delivered' }
                 ].map((step) => (
                   <div key={step.status} className="flex items-center gap-4 rounded-3xl bg-slate-900/80 p-4">
-                    <div className={`grid h-10 w-10 place-items-center rounded-3xl ${
-                      step.completed
+                    <div className={`grid h-10 w-10 place-items-center rounded-3xl ${step.completed
                         ? 'bg-emerald-500/20 text-emerald-300'
                         : step.status === order.status
-                        ? 'bg-sky-500/20 text-sky-300'
-                        : 'bg-slate-700/80 text-slate-400'
-                    }`}>
+                          ? 'bg-sky-500/20 text-sky-300'
+                          : 'bg-slate-700/80 text-slate-400'
+                      }`}>
                       {step.completed ? '✓' : step.status === order.status ? '●' : '○'}
                     </div>
                     <div>
@@ -249,39 +280,39 @@ export default function OrderDetails({ params }: any) {
                 ))}
               </div>
 
-               <div className="space-y-4">
-                 <label className="block text-sm font-medium text-slate-300">Update order status</label>
-                 <select
-                   value={orderStatus}
-                   onChange={(event) => setOrderStatus(event.target.value as Order['status'])}
-                   className="w-full rounded-3xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-white outline-none focus:border-sky-500"
-                 >
-                   <option value="pending">Pending</option>
-                   <option value="placed">Placed</option>
-                   <option value="shipped">Shipped</option>
-                   <option value="delivered">Delivered</option>
-                   <option value="cancelled">Cancelled</option>
-                 </select>
-                 <Button className="w-full" onClick={handleUpdateStatus} disabled={updatingStatus || order.status === orderStatus}>
-                   {updatingStatus ? 'Updating...' : 'Update status'}
-                 </Button>
-               </div>
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-slate-300">Update order status</label>
+                <select
+                  value={orderStatus}
+                  onChange={(event) => setOrderStatus(event.target.value as Order['status'])}
+                  className="w-full rounded-3xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-white outline-none focus:border-sky-500"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="placed">Placed</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <Button className="w-full" onClick={handleUpdateStatus} disabled={updatingStatus || order.status === orderStatus}>
+                  {updatingStatus ? 'Updating...' : 'Update status'}
+                </Button>
+              </div>
 
-               <div className="space-y-4">
-                 <label className="block text-sm font-medium text-slate-300">Update payment status</label>
-                 <select
-                   value={paymentStatus}
-                   onChange={(event) => setPaymentStatus(event.target.value as Order['payment_status'])}
-                   className="w-full rounded-3xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-white outline-none focus:border-sky-500"
-                 >
-                   <option value="pending">Pending</option>
-                   <option value="success">Success</option>
-                   <option value="failed">Failed</option>
-                 </select>
-                 <Button className="w-full" onClick={handleUpdatePaymentStatus} disabled={updatingPaymentStatus || order.payment_status === paymentStatus}>
-                   {updatingPaymentStatus ? 'Updating...' : 'Update payment status'}
-                 </Button>
-               </div>
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-slate-300">Update payment status</label>
+                <select
+                  value={paymentStatus}
+                  onChange={(event) => setPaymentStatus(event.target.value as Order['payment_status'])}
+                  className="w-full rounded-3xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-white outline-none focus:border-sky-500"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="success">Success</option>
+                  <option value="failed">Failed</option>
+                </select>
+                <Button className="w-full" onClick={handleUpdatePaymentStatus} disabled={updatingPaymentStatus || order.payment_status === paymentStatus}>
+                  {updatingPaymentStatus ? 'Updating...' : 'Update payment status'}
+                </Button>
+              </div>
             </Card>
           </div>
         </div>

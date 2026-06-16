@@ -87,6 +87,8 @@ export async function getUserById(id: string) {
         user_id: number;
         address_id: number;
         total_amount: number;
+        total_discount_price: number;
+        shipping: number;
         status: string;
         payment_status: string;
         payment_method: string;

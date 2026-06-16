@@ -151,6 +151,8 @@ export interface Order {
   user_id: number;
   address_id: number;
   total_amount: number;
+  total_discount_price: number;
+  shipping: number;
   status: 'pending' | 'placed' | 'shipped' | 'delivered' | 'cancelled';
   payment_status: 'pending' | 'success' | 'failed';
   payment_method: 'online' | 'cod';
