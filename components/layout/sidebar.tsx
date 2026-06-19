@@ -14,7 +14,7 @@ const navItems = [
     { href: ROUTES.banners, label: 'Banners', icon: Image },
     { href: ROUTES.orders, label: 'Orders', icon: ClipboardList },
     { href: ROUTES.cart, label: 'Cart', icon: ShoppingCart },
-    { href: ROUTES.wishlist, label: 'Wishlist', icon: Heart },
+    { href: ROUTES.adminWishlist || ROUTES.wishlist, label: 'Wishlist', icon: Heart },
     { href: ROUTES.notifications, label: 'Notifications', icon: Bell },
     { href: ROUTES.accountProfile, label: 'Account', icon: Settings }
 ];
@@ -25,7 +25,7 @@ export function Sidebar() {
   return (
     <aside className="hidden w-72 shrink-0 flex-col gap-6 rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-slate-200 shadow-panel backdrop-blur-xl lg:flex">
       <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Ecommerce admin</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">ShopEase admin</p>
         <h2 className="text-2xl font-semibold tracking-tight">Store control panel</h2>
       </div>
 

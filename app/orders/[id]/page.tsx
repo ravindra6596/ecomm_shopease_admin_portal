@@ -223,9 +223,9 @@ export default function OrderDetails({ params }: any) {
                   <div key={index} className="flex items-center justify-between rounded-3xl bg-slate-950/80 p-4">
                     <div>
                       <p className="font-medium text-white">{item.product_name}</p>
-                      <p className="text-xs text-slate-500">Qty {item.quantity} × {formatCurrency(item.price)}</p>
+                      <p className="text-xs text-slate-500">Qty {item.quantity} × {formatCurrency(item.discount_price)}</p>
                     </div>
-                    <p className="font-semibold text-white">{formatCurrency(item.total_price)}</p>
+                    <p className="font-semibold text-white">{formatCurrency(item.discount_price)}</p>
                   </div>
                 ))}
               </div>

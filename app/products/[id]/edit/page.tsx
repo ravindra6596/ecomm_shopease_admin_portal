@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -31,8 +31,18 @@ export default function EditProductPage() {
     price: '',
     discount: '',
     return_policy: '',
+    is_featured: false,
     category_id: ''
   });
+
+  const discountPrice = useMemo(() => {
+    const price = Number(formData.price);
+    const discount = Number(formData.discount);
+    if (!price || !discount || discount <= 0) {
+      return null;
+    }
+    return Math.round(price - (price * discount) / 100);
+  }, [formData.price, formData.discount]);
   const [images, setImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [removedImages, setRemovedImages] = useState<string[]>([]);
@@ -55,6 +65,7 @@ export default function EditProductPage() {
         price: String(data.price),
         discount: data.discount != null ? String(data.discount) : '',
         return_policy: data.return_policy || '',
+        is_featured: data.is_featured || false,
         category_id: String(data.category_id)
       });
       setExistingImages(data.images?.map(img => img.image_url) || []);
@@ -109,30 +120,31 @@ export default function EditProductPage() {
     }
   }
 
-   async function handleUpdate(e: React.FormEvent) {
-     e.preventDefault();
+  async function handleUpdate(e: React.FormEvent) {
+    e.preventDefault();
 
-     if (!formData.name.trim() || !formData.price || !formData.category_id) {
-       toast.error('Please fill in all required fields');
-       return;
-     }
+    if (!formData.name.trim() || !formData.price || !formData.category_id) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
 
-     setSubmitting(true);
-     try {
+    setSubmitting(true);
+    try {
       const formDataObj = new FormData();
       formDataObj.append('name', formData.name.trim());
       formDataObj.append('description', formData.description.trim());
       formDataObj.append('price', formData.price);
       formDataObj.append('discount', formData.discount);
       formDataObj.append('return_policy', formData.return_policy);
+      formDataObj.append('is_featured', String(formData.is_featured));
       formDataObj.append('category_id', formData.category_id);
       images.forEach(img => formDataObj.append('images', img));
       removedImages.forEach(url => formDataObj.append('removed_images', url));
 
-       await updateProduct(productId, formDataObj);
-       toast.success('Product updated successfully!');
-       router.push(`/products/${productId}`);
-     } catch (err) {
+      await updateProduct(productId, formDataObj);
+      toast.success('Product updated successfully!');
+      router.push(`/products/${productId}`);
+    } catch (err) {
       console.error('Failed to update product', err);
       const message = err instanceof Error ? err.message : 'Failed to update product';
       toast.error(message);
@@ -246,25 +258,71 @@ export default function EditProductPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-3">
+
+                {/* Discount */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-200 mb-2">Discount (%)</label>
+                  <label className="block text-sm font-medium text-slate-200 mb-2">
+                    Discount (%)
+                  </label>
+
                   <Input
                     type="number"
                     step="0.01"
                     value={formData.discount}
-                    onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, discount: e.target.value })
+                    }
                     placeholder="0"
                   />
+
+                  {discountPrice !== null && (
+                    <p className="mt-2 text-sm text-emerald-300">
+                      Discount price: ₹{discountPrice.toLocaleString()}
+                    </p>
+                  )}
                 </div>
+
+                {/* Return Policy */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-200 mb-2">Return Policy</label>
+                  <label className="block text-sm font-medium text-slate-200 mb-2">
+                    Return Policy
+                  </label>
+
                   <Input
                     value={formData.return_policy}
-                    onChange={(e) => setFormData({ ...formData, return_policy: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, return_policy: e.target.value })
+                    }
                     placeholder="Short return policy"
                   />
                 </div>
+
+                {/* Is Featured (NEW) */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-2">
+                    Is Featured
+                  </label>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={!!formData.is_featured}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          is_featured: e.target.checked,
+                        })
+                      }
+                      className="h-4 w-4 accent-emerald-500"
+                    />
+
+                    <span className="text-sm text-slate-300">
+                      Mark as featured product
+                    </span>
+                  </div>
+                </div>
+
               </div>
 
               <div>
@@ -327,51 +385,51 @@ export default function EditProductPage() {
                 </div>
               )}
 
-               {/* New Images Preview */}
-               {images.length > 0 && (
-                 <div>
-                   <label className="block text-sm font-medium text-slate-200 mb-2">New Images ({images.length})</label>
-                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                     {images.map((file, idx) => (
-                       <div key={idx} className="relative group">
-                         <img
-                           src={URL.createObjectURL(file)}
-                           alt={`Preview ${idx + 1}`}
-                           className="h-24 w-full object-cover rounded-lg border border-white/10"
-                         />
-                         <button
-                           type="button"
-                           onClick={() => removeNewImage(idx)}
-                           className="absolute top-2 right-2 h-6 w-6 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                         >
-                           <X className="h-3 w-3" />
-                         </button>
-                       </div>
-                     ))}
-                   </div>
-                 </div>
-               )}
-
-               {/* Image Upload */}
-               <div>
-                 <label className="block text-sm font-medium text-slate-200 mb-2">
-                   Add More Images (optional)
-                 </label>
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-lg cursor-pointer bg-slate-900/30 hover:bg-slate-900/50 hover:border-violet-400 transition-colors">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-8 h-8 mb-2 text-slate-400" />
-                      <p className="text-sm text-slate-400">Click to upload or drag and drop</p>
-                      <p className="text-xs text-slate-500 mt-1">SVG, PNG, JPG or GIF (MAX. 5MB each)</p>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </label>
+              {/* New Images Preview */}
+              {images.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-200 mb-2">New Images ({images.length})</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {images.map((file, idx) => (
+                      <div key={idx} className="relative group">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Preview ${idx + 1}`}
+                          className="h-24 w-full object-cover rounded-lg border border-white/10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeNewImage(idx)}
+                          className="absolute top-2 right-2 h-6 w-6 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              )}
+
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">
+                  Add More Images (optional)
+                </label>
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-lg cursor-pointer bg-slate-900/30 hover:bg-slate-900/50 hover:border-violet-400 transition-colors">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="w-8 h-8 mb-2 text-slate-400" />
+                    <p className="text-sm text-slate-400">Click to upload or drag and drop</p>
+                    <p className="text-xs text-slate-500 mt-1">SVG, PNG, JPG or GIF (MAX. 5MB each)</p>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
 
               <div className="flex items-center gap-3 pt-4 border-t border-white/10">
                 <Button type="submit" disabled={submitting}>

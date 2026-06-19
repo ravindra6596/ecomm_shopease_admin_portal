@@ -52,9 +52,19 @@ export default function ProductsPage() {
     price: '',
     discount: '',
     return_policy: '',
+    is_featured: false,
     category_id: ''
   });
   const [images, setImages] = useState<File[]>([]);
+
+  const discountPrice = useMemo(() => {
+    const price = Number(formData.price);
+    const discount = Number(formData.discount);
+    if (!price || !discount || discount <= 0) {
+      return null;
+    }
+    return Math.round(price - (price * discount) / 100);
+  }, [formData.price, formData.discount]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [removedImages, setRemovedImages] = useState<string[]>([]);
 
@@ -98,7 +108,7 @@ export default function ProductsPage() {
   }
 
   function resetForm() {
-    setFormData({ name: '', description: '', price: '', discount: '', return_policy: '', category_id: '' });
+    setFormData({ name: '', description: '', price: '', discount: '', return_policy: '', is_featured: false, category_id: '' });
     setImages([]);
     setExistingImages([]);
     setRemovedImages([]);
@@ -117,6 +127,7 @@ export default function ProductsPage() {
       price: String(product.price),
       discount: product.discount != null ? String(product.discount) : '',
       return_policy: product.return_policy || '',
+      is_featured: product.is_featured || false,
       category_id: String(product.category_id)
     });
     setExistingImages(product.images?.map(img => img.image_url) || []);
@@ -205,9 +216,12 @@ export default function ProductsPage() {
       formDataObj.append('name', formData.name.trim());
       formDataObj.append('description', formData.description.trim());
       formDataObj.append('price', formData.price);
+      formDataObj.append('discount', formData.discount);
+      formDataObj.append('return_policy', formData.return_policy);
+      formDataObj.append('is_featured', String(formData.is_featured));
       formDataObj.append('category_id', formData.category_id);
       images.forEach(img => formDataObj.append('images', img));
-      
+
       console.log('Creating product with', images.length, 'images');
       console.log('FormData images:', formDataObj.getAll('images'));
 
@@ -238,12 +252,11 @@ export default function ProductsPage() {
       formDataObj.append('price', formData.price);
       formDataObj.append('discount', formData.discount);
       formDataObj.append('return_policy', formData.return_policy);
-      formDataObj.append('discount', formData.discount);
-      formDataObj.append('return_policy', formData.return_policy);
+      formDataObj.append('is_featured', formData.is_featured.toString());
       formDataObj.append('category_id', formData.category_id);
       images.forEach(img => formDataObj.append('images', img));
       removedImages.forEach(url => formDataObj.append('removed_images', url));
-      
+
       console.log('Updating product with', images.length, 'new images');
       console.log('FormData images:', formDataObj.getAll('images'));
 
@@ -463,7 +476,7 @@ export default function ProductsPage() {
                       filteredProducts.map((product, index) => (
                         <tr key={product.id} className="bg-slate-900/50 hover:bg-slate-900/70 transition-colors">
                           <td className="px-5 py-4 text-slate-300">{(page - 1) * 10 + index + 1}</td>
-                          <td className="px-5 py-4 text-slate-300">{product.id}</td> 
+                          <td className="px-5 py-4 text-slate-300">{product.id}</td>
                           <td className="px-5 py-4 max-w-[300px]">
                             <div>
                               <p className="font-medium text-white line-clamp-2">{product.name || 'Unnamed Product'}</p>
@@ -572,22 +585,74 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-3">
+
+                  {/* Discount */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-200 mb-2">Discount (%)</label>
+                    <label className="block text-sm font-medium text-slate-200 mb-2">
+                      Discount (%)
+                    </label>
+
                     <Input
                       type="number"
                       step="0.01"
-                      value={formData.discount}
-                      onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                      min="0"
+                      max="100"
+                      value={formData.discount || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          discount: e.target.value,
+                        }))
+                      }
                       placeholder="0"
                     />
+
+                    {discountPrice !== null && (
+                      <p className="mt-2 text-sm text-emerald-400 font-medium">
+                        Discount price: ₹{Number(discountPrice).toLocaleString()}
+                      </p>
+                    )}
                   </div>
+
+                  {/* Is Default (FIXED CHECKBOX) */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-200 mb-2">Return Policy</label>
+                    <label className="block text-sm font-medium text-slate-200 mb-2">
+                      Is Featured
+                    </label>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={!!formData.is_featured}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            is_featured: e.target.checked,
+                          }))
+                        }
+                        className="h-4 w-4 accent-emerald-500"
+                      />
+                      <span className="text-sm text-slate-300">
+                        Mark as featured
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Return Policy */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-200 mb-2">
+                      Return Policy
+                    </label>
+
                     <Input
-                      value={formData.return_policy}
-                      onChange={(e) => setFormData({ ...formData, return_policy: e.target.value })}
+                      value={formData.return_policy || ""}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          return_policy: e.target.value,
+                        }))
+                      }
                       placeholder="Short return policy"
                     />
                   </div>
@@ -620,7 +685,7 @@ export default function ProductsPage() {
                   <label className="block text-sm font-medium text-slate-200 mb-2">
                     Images {showEditModal && '(leave empty to keep existing)'}
                   </label>
-                  <div 
+                  <div
                     className="mt-2 flex flex-wrap gap-3 p-4 rounded-lg border-2 border-dashed border-white/10 hover:border-violet-400 transition-colors"
                     onPaste={handleImagePaste}
                   >

@@ -32,7 +32,12 @@ export async function updateOrderStatus(id: number, status: Order['status']): Pr
 
   return data;
 }
-
+export async function getOrderInvoice(id: number): Promise<Blob> {
+  const response = await api.get(`/orders/${id}/invoice`, {
+    responseType: 'blob'
+  });
+  return response.data;
+}
 export async function updateOrderPaymentStatus(id: number, payment_status: Order['payment_status']): Promise<Order> {
   const response = await api.patch(`/orders/${id}/payment`, { payment_status });
   const data = response.data.data ?? response.data;

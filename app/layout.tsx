@@ -6,7 +6,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'ShopEase Admin Panel',
-  description: 'Premium ecommerce admin dashboard with analytics, user management, and product controls.'
+  description: 'Premium ShopEase admin dashboard with analytics, user management, and product controls.'
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

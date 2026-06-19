@@ -63,6 +63,7 @@ export interface Product {
   discount?: number;
   discount_price?: number;
   return_policy?: string;
+  is_featured: boolean;
   category_id: number;
   category_name: string;
   images: Array<{
@@ -130,6 +131,8 @@ export interface OrderItem {
   quantity: number;
   price: number;
   total_price: number;
+  discount: number;
+  discount_price: number;
 }
 
 export interface OrderAddress {

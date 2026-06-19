@@ -24,6 +24,7 @@ interface ApiProductsPayload {
     discount?: number;
     discount_price?: number;
     return_policy?: string;
+    is_featured: boolean;
     category_id: number;
     category_name: string;
     images: Array<{
@@ -46,6 +47,7 @@ interface ApiProductResponse {
   discount?: number;
   discount_price?: number;
   return_policy?: string;
+  is_featured: boolean;
   category_id: number;
   category_name: string;
   images: Array<{
@@ -111,6 +113,7 @@ function mapProduct(item: ApiProductResponse): Product {
     discount: item.discount,
     discount_price: item.discount_price,
     return_policy: item.return_policy,
+    is_featured: item.is_featured || false,
     category_id: item.category_id,
     category_name: item.category_name || '',
     images: item.images || [],

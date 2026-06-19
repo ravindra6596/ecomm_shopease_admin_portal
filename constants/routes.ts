@@ -11,6 +11,8 @@ export const ROUTES = {
   banners: '/banners',
   cart: '/cart',
   wishlist: '/wishlist',
+  // Admin wishlist listing (separate admin UI)
+  adminWishlist: '/wishlists',
   orders: '/orders',
   notifications: '/notifications',
   account: '/account',
